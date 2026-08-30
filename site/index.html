@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a3d62">
+<title>Acesso</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; overflow: hidden; background: #0a3d62; }
+.tela { position: fixed; inset: 0; height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 24px; transition: opacity .5s ease; }
+.oculto { opacity: 0; }
+.oculto, .oculto * { pointer-events: none !important; }
+img.conf { object-fit: contain; display: block; }
+.logo-img { max-width: 62%; max-height: 42vh; }
+.topo-img { max-width: 55%; max-height: 26vh; margin-bottom: 40px; }
+.cont-img { max-width: 58%; max-height: 24vh; margin-bottom: 22px; }
+.cont-gif { max-width: 50%; max-height: 24vh; margin-top: 8px; }
+.ph { display: grid; place-items: center; border-radius: 16px; background: #e6e6e6; color: #666; border: 2px dashed #bbb; font-weight: 700; letter-spacing: 1px; }
+.ph.logo-img { width: 200px; height: 200px; } .ph.topo-img { width: 150px; height: 150px; }
+.ph.cont-img { width: 150px; height: 120px; } .ph.cont-gif { width: 120px; height: 120px; }
+.bolinhas { display: flex; gap: 16px; margin-bottom: 42px; }
+.bolinha { width: 20px; height: 20px; border-radius: 50%; background: var(--bolinha); border: 2px solid rgba(0,0,0,.12); transition: transform .12s ease, background .12s ease; cursor: pointer; }
+.bolinha.on { background: var(--bolinha-on); transform: scale(1.08); }
+#matricula { position: absolute; opacity: 0; width: 1px; height: 1px; border: 0; padding: 0; font-size: 16px; pointer-events: none; }
+.btn-confirmar { min-width: 200px; padding: 15px 34px; border: 0; border-radius: 12px; font-family: inherit; font-size: 1.05rem; font-weight: 700; cursor: pointer; background: var(--btn); color: var(--btn-txt); opacity: .45; pointer-events: none; transition: opacity .2s ease, transform .1s ease; }
+.btn-confirmar.ativo { opacity: 1; pointer-events: auto; } .btn-confirmar.ativo:active { transform: scale(.97); }
+.dica { margin-top: 22px; font-size: .82rem; color: var(--dica); }
+.cont h1 { font-size: 1.5rem; margin-bottom: 10px; text-align: center; }
+.cont p { font-size: 1.02rem; text-align: center; margin-bottom: 6px; max-width: 92%; line-height: 1.5; }
+</style>
+</head>
+<body>
+  <div class="tela" id="tela1"><img class="conf logo-img" id="splash-logo" alt="logo"></div>
+  <div class="tela oculto" id="tela-acesso">
+    <img class="conf topo-img" id="acesso-img" alt="">
+    <div class="bolinhas" id="bolinhas"></div>
+    <input id="matricula" type="tel" inputmode="numeric" autocomplete="off" maxlength="6">
+    <button class="btn-confirmar" id="btn-confirmar" type="button">Confirmar</button>
+    <div class="dica" id="dica">Toque para digitar sua matrícula</div>
+  </div>
+  <div class="tela oculto cont" id="tela-gif">
+    <img class="conf cont-img" id="gif-img" alt=""><h1 id="gif-titulo"></h1><p id="gif-texto"></p><img class="conf cont-gif" id="gif-anim" alt="">
+  </div>
+  <div class="tela oculto cont" id="tela-final">
+    <img class="conf cont-img" id="fim-img" alt=""><h1 id="fim-titulo"></h1><p id="fim-texto"></p><img class="conf cont-gif" id="fim-anim" alt="">
+  </div>
+
+<script>
+const DEFAULT = {
+  splash: { cor:"#0a3d62", logo:"", duracao:3000 },
+  acesso: { cor:"#0a3d62", imagem:"", digitos:6, corBolinha:"#ffffff", corBolinhaPreenchida:"#000000", textoBotao:"Confirmar", corBotao:"#ffffff", corTextoBotao:"#0a3d62", corDica:"rgba(255,255,255,.75)", mostrarDica:true },
+  telaGif: { cor:"#0a3d62", imagem:"", titulo:"Aguarde um instante", texto:"Estamos preparando a próxima etapa.", gif:"", corTitulo:"#ffffff", corTexto:"rgba(255,255,255,.9)", duracao:5000 },
+  telaFinal: { cor:"#0a3d62", imagem:"", titulo:"Tudo certo!", texto:"Suas matrículas foram registradas.", gif:"", corTitulo:"#ffffff", corTexto:"rgba(255,255,255,.9)" }
+};
+
+function iniciar(CONFIG) {
+  const $ = (id) => document.getElementById(id);
+  const N = Math.max(1, CONFIG.acesso.digitos | 0);
+  const r = document.documentElement.style;
+  r.setProperty("--bolinha", CONFIG.acesso.corBolinha);
+  r.setProperty("--bolinha-on", CONFIG.acesso.corBolinhaPreenchida);
+  r.setProperty("--btn", CONFIG.acesso.corBotao);
+  r.setProperty("--btn-txt", CONFIG.acesso.corTextoBotao);
+  r.setProperty("--dica", CONFIG.acesso.corDica);
+  $("tela1").style.background = CONFIG.splash.cor;
+  $("tela-acesso").style.background = CONFIG.acesso.cor;
+  $("tela-gif").style.background = CONFIG.telaGif.cor;
+  $("tela-final").style.background = CONFIG.telaFinal.cor;
+
+  function img(id, url, classe, rot) { const el = $(id); if (url) { el.src = url; el.onerror = () => ph(el, classe, rot); } else ph(el, classe, rot); }
+  function ph(el, classe, rot) { const d = document.createElement("div"); d.className = "ph " + classe; d.textContent = rot; el.parentNode.replaceChild(d, el); }
+  img("splash-logo", CONFIG.splash.logo, "logo-img", "LOGO");
+  img("acesso-img", CONFIG.acesso.imagem, "topo-img", "IMAGEM");
+  img("gif-img", CONFIG.telaGif.imagem, "cont-img", "IMAGEM");
+  img("gif-anim", CONFIG.telaGif.gif, "cont-gif", "GIF");
+  img("fim-img", CONFIG.telaFinal.imagem, "cont-img", "IMAGEM");
+  img("fim-anim", CONFIG.telaFinal.gif, "cont-gif", "GIF");
+
+  $("gif-titulo").textContent = CONFIG.telaGif.titulo; $("gif-titulo").style.color = CONFIG.telaGif.corTitulo;
+  $("gif-texto").textContent = CONFIG.telaGif.texto; $("gif-texto").style.color = CONFIG.telaGif.corTexto;
+  $("fim-titulo").textContent = CONFIG.telaFinal.titulo; $("fim-titulo").style.color = CONFIG.telaFinal.corTitulo;
+  $("fim-texto").textContent = CONFIG.telaFinal.texto; $("fim-texto").style.color = CONFIG.telaFinal.corTexto;
+
+  const btn = $("btn-confirmar");
+  btn.textContent = CONFIG.acesso.textoBotao;
+  $("dica").style.display = CONFIG.acesso.mostrarDica ? "" : "none";
+
+  const wrap = $("bolinhas");
+  for (let i = 0; i < N; i++) { const b = document.createElement("span"); b.className = "bolinha"; b.addEventListener("click", limparEReabrir); wrap.appendChild(b); }
+  const bolinhas = [...wrap.children];
+  const input = $("matricula"); input.maxLength = N;
+
+  function atualiza() { const v = input.value.replace(/\D/g, "").slice(0, N); if (v !== input.value) input.value = v; bolinhas.forEach((b, i) => b.classList.toggle("on", i < v.length)); btn.classList.toggle("ativo", v.length === N); }
+  input.addEventListener("input", atualiza);
+  function abrirTeclado() { input.focus(); }
+  function limparEReabrir() { input.value = ""; atualiza(); abrirTeclado(); }
+  function resetAcesso() { input.value = ""; atualiza(); }
+  $("tela-acesso").addEventListener("click", (e) => { if (e.target !== btn) abrirTeclado(); });
+
+  function mostrar(id) { ["tela1","tela-acesso","tela-gif","tela-final"].forEach((t) => $(t).classList.add("oculto")); $(id).classList.remove("oculto"); }
+
+  const sessaoId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + Math.random();
+  async function salvar(dados) {
+    dados.id = sessaoId;
+    try { await fetch("/api/matriculas", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(dados) }); } catch (e) {}
+  }
+
+  let etapa = 1;
+  btn.addEventListener("click", async (e) => {
+    e.stopPropagation();
+    if (input.value.length !== N) return;
+    const valor = input.value;
+    if (etapa === 1) {
+      await salvar({ matricula1: valor });
+      mostrar("tela-gif");
+      setTimeout(() => { etapa = 2; resetAcesso(); mostrar("tela-acesso"); setTimeout(abrirTeclado, 500); }, CONFIG.telaGif.duracao);
+    } else {
+      await salvar({ matricula2: valor });
+      mostrar("tela-final");
+    }
+  });
+
+  setTimeout(() => { mostrar("tela-acesso"); setTimeout(abrirTeclado, 500); }, CONFIG.splash.duracao);
+}
+
+// busca a configuração do servidor e inicia (usa DEFAULT se falhar)
+fetch("/api/config").then((r) => r.json()).then((j) => iniciar(j.config || DEFAULT)).catch(() => iniciar(DEFAULT));
+</script>
+</body>
+</html>
