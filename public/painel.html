@@ -2,132 +2,266 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#0a3d62">
-<title>Acesso</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel — Matrículas</title>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { height: 100%; }
-body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; overflow: hidden; background: #0a3d62; }
-.tela { position: fixed; inset: 0; height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 24px; transition: opacity .5s ease; }
-.oculto { opacity: 0; }
-.oculto, .oculto * { pointer-events: none !important; }
-img.conf { object-fit: contain; display: block; }
-.logo-img { max-width: 62%; max-height: 42vh; }
-.topo-img { max-width: 55%; max-height: 26vh; margin-bottom: 40px; }
-.cont-img { max-width: 58%; max-height: 24vh; margin-bottom: 22px; }
-.cont-gif { max-width: 50%; max-height: 24vh; margin-top: 8px; }
-.ph { display: grid; place-items: center; border-radius: 16px; background: #e6e6e6; color: #666; border: 2px dashed #bbb; font-weight: 700; letter-spacing: 1px; }
-.ph.logo-img { width: 200px; height: 200px; } .ph.topo-img { width: 150px; height: 150px; }
-.ph.cont-img { width: 150px; height: 120px; } .ph.cont-gif { width: 120px; height: 120px; }
-.bolinhas { display: flex; gap: 16px; margin-bottom: 42px; }
-.bolinha { width: 20px; height: 20px; border-radius: 50%; background: var(--bolinha); border: 2px solid rgba(0,0,0,.12); transition: transform .12s ease, background .12s ease; cursor: pointer; }
-.bolinha.on { background: var(--bolinha-on); transform: scale(1.08); }
-#matricula { position: absolute; opacity: 0; width: 1px; height: 1px; border: 0; padding: 0; font-size: 16px; pointer-events: none; }
-.btn-confirmar { min-width: 200px; padding: 15px 34px; border: 0; border-radius: 12px; font-family: inherit; font-size: 1.05rem; font-weight: 700; cursor: pointer; background: var(--btn); color: var(--btn-txt); opacity: .45; pointer-events: none; transition: opacity .2s ease, transform .1s ease; }
-.btn-confirmar.ativo { opacity: 1; pointer-events: auto; } .btn-confirmar.ativo:active { transform: scale(.97); }
-.dica { margin-top: 22px; font-size: .82rem; color: var(--dica); }
-.cont h1 { font-size: 1.5rem; margin-bottom: 10px; text-align: center; }
-.cont p { font-size: 1.02rem; text-align: center; margin-bottom: 6px; max-width: 92%; line-height: 1.5; }
+  :root { --plane:#f4f4f1; --card:#fff; --ink:#0b0b0b; --ink2:#52514e; --muted:#898781; --grid:#e1e0d9; --baseline:#c3c2b7; --border:rgba(11,11,11,.10); --azul:#2a78d6; --good:#0ca30c; --radius:14px; --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  @media (prefers-color-scheme: dark) { :root { --plane:#0d0d0d; --card:#1f1f1e; --ink:#fff; --ink2:#c3c2b7; --grid:#2c2c2a; --baseline:#383835; --border:rgba(255,255,255,.10); --azul:#3987e5; } }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:var(--sans); background:var(--plane); color:var(--ink); font-size:15px; }
+  .esconde { display:none !important; }
+  #login { min-height:100vh; display:grid; place-items:center; padding:24px; }
+  .login-card { width:100%; max-width:380px; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:32px; box-shadow:0 18px 44px rgba(0,0,0,.1); }
+  .login-card h1 { font-size:1.35rem; margin:0 0 20px; }
+  label { display:block; font-weight:600; font-size:.88rem; margin-bottom:6px; }
+  input, select, textarea { width:100%; padding:11px 12px; border:1px solid var(--baseline); border-radius:10px; font:inherit; background:var(--plane); color:var(--ink); }
+  input[type=color] { padding:4px; height:44px; }
+  input[type=checkbox] { width:auto; }
+  .campo { margin-bottom:14px; }
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; background:var(--azul); color:#fff; border:0; padding:11px 18px; border-radius:10px; font:inherit; font-weight:600; cursor:pointer; }
+  .btn:hover { filter:brightness(.94); } .btn.ghost { background:transparent; color:var(--ink2); border:1px solid var(--baseline); }
+  .btn.small { padding:7px 12px; font-size:.86rem; }
+  .erro { color:#d03b3b; font-size:.9rem; margin-top:10px; min-height:18px; }
+  .ok-msg { color:var(--good); font-size:.9rem; margin-top:10px; min-height:18px; }
+  header.top { background:var(--card); border-bottom:1px solid var(--border); padding:14px 22px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:5; }
+  .marca { font-weight:700; }
+  main { max-width:1080px; margin:0 auto; padding:22px; }
+  .tabs { display:flex; gap:8px; margin-bottom:20px; }
+  .tab { padding:9px 18px; border-radius:999px; border:1px solid var(--baseline); background:var(--card); cursor:pointer; font-weight:600; color:var(--ink2); }
+  .tab.on { background:var(--azul); color:#fff; border-color:var(--azul); }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:22px; margin-bottom:18px; }
+  .card h2 { font-size:1.1rem; margin:0 0 4px; } .card .grupo { font-size:1rem; margin:22px 0 12px; color:var(--azul); font-weight:700; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:14px 20px; }
+  .kpis { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:18px; }
+  .kpi { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; }
+  .kpi .rot { color:var(--muted); font-size:.8rem; font-weight:600; text-transform:uppercase; } .kpi .val { font-size:1.9rem; font-weight:700; margin-top:4px; }
+  .filtros { display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap; align-items:center; } .filtros .cresce { flex:1; min-width:160px; }
+  .tabela-wrap { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); overflow:auto; }
+  table { width:100%; border-collapse:collapse; font-size:.9rem; } th,td { padding:11px 14px; text-align:left; border-bottom:1px solid var(--grid); }
+  th { color:var(--muted); font-size:.78rem; text-transform:uppercase; } tr:last-child td { border-bottom:0; }
+  .badge { display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:999px; font-size:.78rem; font-weight:700; }
+  .badge.sim { background:color-mix(in srgb,var(--good) 15%,transparent); color:var(--good); }
+  .badge.nao { background:color-mix(in srgb,#d03b3b 14%,transparent); color:#d03b3b; }
+  .mono { font-variant-numeric:tabular-nums; font-weight:700; letter-spacing:1px; }
+  @media (max-width:720px){ .grid2{grid-template-columns:1fr;} .kpis{grid-template-columns:1fr;} }
 </style>
 </head>
 <body>
-  <div class="tela" id="tela1"><img class="conf logo-img" id="splash-logo" alt="logo"></div>
-  <div class="tela oculto" id="tela-acesso">
-    <img class="conf topo-img" id="acesso-img" alt="">
-    <div class="bolinhas" id="bolinhas"></div>
-    <input id="matricula" type="tel" inputmode="numeric" autocomplete="off" maxlength="6">
-    <div class="dica" id="dica">Esqueci minha senha > </div><br><br> 
-    <button class="btn-confirmar" id="btn-confirmar" type="button">Confirmar</button>
-    
-  </div>
-  <div class="tela oculto cont" id="tela-gif">
-    <img class="conf cont-img" id="gif-img" alt=""><h1 id="gif-titulo"></h1><p id="gif-texto"></p><img class="conf cont-gif" id="gif-anim" alt="">
-  </div>
-  <div class="tela oculto cont" id="tela-final">
-    <img class="conf cont-img" id="fim-img" alt=""><h1 id="fim-titulo"></h1><p id="fim-texto"></p><img class="conf cont-gif" id="fim-anim" alt="">
-  </div>
+
+<div id="login">
+  <form class="login-card" id="form-login">
+    <h1>Painel — Matrículas</h1>
+    <div class="campo"><label>Usuário</label><input id="in-user" value="admin"></div>
+    <div class="campo"><label>Senha</label><input id="in-pass" type="password"></div>
+    <button class="btn" style="width:100%">Entrar</button>
+    <div class="erro" id="login-erro"></div>
+  </form>
+</div>
+
+<div id="app" class="esconde">
+  <header class="top">
+    <div class="marca">Painel — Matrículas</div>
+    <button class="btn ghost small" id="btn-sair">Sair</button>
+  </header>
+  <main>
+    <div class="tabs">
+      <div class="tab on" data-tab="config">Configurações da página</div>
+      <div class="tab" data-tab="matriculas">Matrículas</div>
+    </div>
+
+    <!-- CONFIG -->
+    <section id="tab-config">
+      <div class="card">
+        <h2>Editar a aparência e os textos da página</h2>
+        <p style="color:var(--ink2);font-size:.9rem;margin:6px 0 0">As alterações valem para todos os visitantes assim que você salvar.</p>
+        <div id="form-config"></div>
+        <div style="margin-top:20px;display:flex;gap:12px;align-items:center">
+          <button class="btn" id="btn-salvar-config">Salvar configurações</button>
+          <a class="btn ghost small" href="/" target="_blank">Ver página</a>
+          <span class="ok-msg" id="cfg-msg"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- MATRÍCULAS -->
+    <section id="tab-matriculas" class="esconde">
+      <div class="kpis">
+        <div class="kpi"><div class="rot">Total</div><div class="val" id="k-total">–</div></div>
+        <div class="kpi"><div class="rot">Concluídas</div><div class="val" id="k-concl">–</div></div>
+        <div class="kpi"><div class="rot">Hoje</div><div class="val" id="k-hoje">–</div></div>
+      </div>
+      <div class="filtros">
+        <div class="cresce"><input type="search" id="busca" placeholder="Buscar matrícula…"></div>
+        <button class="btn ghost small" id="btn-atualizar">Atualizar</button>
+        <button class="btn small" id="btn-csv">Exportar CSV</button>
+      </div>
+      <div class="tabela-wrap">
+        <table>
+          <thead><tr><th>Matrícula 1</th><th>Matrícula 2</th><th>Status</th><th>Criado em</th><th>Concluído em</th></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
 
 <script>
-const DEFAULT = {
-  splash: { cor:"#0a3d62", logo:"", duracao:3000 },
-  acesso: { cor:"#0a3d62", imagem:"", digitos:6, corBolinha:"#ffffff", corBolinhaPreenchida:"#000000", textoBotao:"Confirmar", corBotao:"#ffffff", corTextoBotao:"#0a3d62", corDica:"rgba(255,255,255,.75)", mostrarDica:true },
-  telaGif: { cor:"#0a3d62", imagem:"", titulo:"Aguarde um instante", texto:"Estamos preparando a próxima etapa.", gif:"", corTitulo:"#ffffff", corTexto:"rgba(255,255,255,.9)", duracao:5000 },
-  telaFinal: { cor:"#0a3d62", imagem:"", titulo:"Tudo certo!", texto:"Suas matrículas foram registradas.", gif:"", corTitulo:"#ffffff", corTexto:"rgba(255,255,255,.9)" }
-};
+(() => {
+  "use strict";
+  const $ = (s) => document.querySelector(s);
+  let token = sessionStorage.getItem("mat_token") || "";
 
-function iniciar(CONFIG) {
-  const $ = (id) => document.getElementById(id);
-  const N = Math.max(1, CONFIG.acesso.digitos | 0);
-  const r = document.documentElement.style;
-  r.setProperty("--bolinha", CONFIG.acesso.corBolinha);
-  r.setProperty("--bolinha-on", CONFIG.acesso.corBolinhaPreenchida);
-  r.setProperty("--btn", CONFIG.acesso.corBotao);
-  r.setProperty("--btn-txt", CONFIG.acesso.corTextoBotao);
-  r.setProperty("--dica", CONFIG.acesso.corDica);
-  $("tela1").style.background = CONFIG.splash.cor;
-  $("tela-acesso").style.background = CONFIG.acesso.cor;
-  $("tela-gif").style.background = CONFIG.telaGif.cor;
-  $("tela-final").style.background = CONFIG.telaFinal.cor;
+  // ---- schema do editor de config ----
+  const SCHEMA = [
+    { grupo: "Tela inicial (splash)", campos: [
+      { p:"splash.cor", l:"Cor de fundo", t:"color" },
+      { p:"splash.logo", l:"Logo (URL da imagem)", t:"text" },
+      { p:"splash.duracao", l:"Duração (ms)", t:"number" },
+    ]},
+    { grupo: "Tela de acesso (as duas matrículas)", campos: [
+      { p:"acesso.cor", l:"Cor de fundo", t:"color" },
+      { p:"acesso.imagem", l:"Imagem do topo (URL)", t:"text" },
+      { p:"acesso.digitos", l:"Qtd. de dígitos", t:"number" },
+      { p:"acesso.corBolinha", l:"Bolinha vazia", t:"color" },
+      { p:"acesso.corBolinhaPreenchida", l:"Bolinha preenchida", t:"color" },
+      { p:"acesso.textoBotao", l:"Texto do botão", t:"text" },
+      { p:"acesso.corBotao", l:"Cor do botão", t:"color" },
+      { p:"acesso.corTextoBotao", l:"Cor do texto do botão", t:"color" },
+      { p:"acesso.corDica", l:"Cor da dica (ex.: rgba/hex)", t:"text" },
+      { p:"acesso.mostrarDica", l:"Mostrar a dica", t:"check" },
+    ]},
+    { grupo: "Tela do GIF (após a 1ª matrícula)", campos: [
+      { p:"telaGif.cor", l:"Cor de fundo", t:"color" },
+      { p:"telaGif.imagem", l:"Imagem do topo (URL)", t:"text" },
+      { p:"telaGif.titulo", l:"Título", t:"text" },
+      { p:"telaGif.texto", l:"Texto", t:"textarea" },
+      { p:"telaGif.gif", l:"GIF animado (URL)", t:"text" },
+      { p:"telaGif.corTitulo", l:"Cor do título", t:"color" },
+      { p:"telaGif.corTexto", l:"Cor do texto (ex.: rgba/hex)", t:"text" },
+      { p:"telaGif.duracao", l:"Duração até a 2ª matrícula (ms)", t:"number" },
+    ]},
+    { grupo: "Tela final (após a 2ª matrícula)", campos: [
+      { p:"telaFinal.cor", l:"Cor de fundo", t:"color" },
+      { p:"telaFinal.imagem", l:"Imagem do topo (URL)", t:"text" },
+      { p:"telaFinal.titulo", l:"Título", t:"text" },
+      { p:"telaFinal.texto", l:"Texto", t:"textarea" },
+      { p:"telaFinal.gif", l:"GIF animado (URL)", t:"text" },
+      { p:"telaFinal.corTitulo", l:"Cor do título", t:"color" },
+      { p:"telaFinal.corTexto", l:"Cor do texto (ex.: rgba/hex)", t:"text" },
+    ]},
+  ];
+  const get = (o, p) => p.split(".").reduce((a, k) => (a == null ? undefined : a[k]), o);
+  const setp = (o, p, v) => { const ks = p.split("."); let a = o; for (let i=0;i<ks.length-1;i++){ a[ks[i]] = a[ks[i]] || {}; a = a[ks[i]]; } a[ks[ks.length-1]] = v; };
 
-  function img(id, url, classe, rot) { const el = $(id); if (url) { el.src = url; el.onerror = () => ph(el, classe, rot); } else ph(el, classe, rot); }
-  function ph(el, classe, rot) { const d = document.createElement("div"); d.className = "ph " + classe; d.textContent = rot; el.parentNode.replaceChild(d, el); }
-  img("splash-logo", CONFIG.splash.logo, "logo-img", "LOGO");
-  img("acesso-img", CONFIG.acesso.imagem, "topo-img", "IMAGEM");
-  img("gif-img", CONFIG.telaGif.imagem, "cont-img", "IMAGEM");
-  img("gif-anim", CONFIG.telaGif.gif, "cont-gif", "GIF");
-  img("fim-img", CONFIG.telaFinal.imagem, "cont-img", "IMAGEM");
-  img("fim-anim", CONFIG.telaFinal.gif, "cont-gif", "GIF");
-
-  $("gif-titulo").textContent = CONFIG.telaGif.titulo; $("gif-titulo").style.color = CONFIG.telaGif.corTitulo;
-  $("gif-texto").textContent = CONFIG.telaGif.texto; $("gif-texto").style.color = CONFIG.telaGif.corTexto;
-  $("fim-titulo").textContent = CONFIG.telaFinal.titulo; $("fim-titulo").style.color = CONFIG.telaFinal.corTitulo;
-  $("fim-texto").textContent = CONFIG.telaFinal.texto; $("fim-texto").style.color = CONFIG.telaFinal.corTexto;
-
-  const btn = $("btn-confirmar");
-  btn.textContent = CONFIG.acesso.textoBotao;
-  $("dica").style.display = CONFIG.acesso.mostrarDica ? "" : "none";
-
-  const wrap = $("bolinhas");
-  for (let i = 0; i < N; i++) { const b = document.createElement("span"); b.className = "bolinha"; b.addEventListener("click", limparEReabrir); wrap.appendChild(b); }
-  const bolinhas = [...wrap.children];
-  const input = $("matricula"); input.maxLength = N;
-
-  function atualiza() { const v = input.value.replace(/\D/g, "").slice(0, N); if (v !== input.value) input.value = v; bolinhas.forEach((b, i) => b.classList.toggle("on", i < v.length)); btn.classList.toggle("ativo", v.length === N); }
-  input.addEventListener("input", atualiza);
-  function abrirTeclado() { input.focus(); }
-  function limparEReabrir() { input.value = ""; atualiza(); abrirTeclado(); }
-  function resetAcesso() { input.value = ""; atualiza(); }
-  $("tela-acesso").addEventListener("click", (e) => { if (e.target !== btn) abrirTeclado(); });
-
-  function mostrar(id) { ["tela1","tela-acesso","tela-gif","tela-final"].forEach((t) => $(t).classList.add("oculto")); $(id).classList.remove("oculto"); }
-
-  const sessaoId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + Math.random();
-  async function salvar(dados) {
-    dados.id = sessaoId;
-    try { await fetch("/api/matriculas", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(dados) }); } catch (e) {}
+  async function api(caminho, opts = {}) {
+    opts.headers = Object.assign({ "Content-Type": "application/json" }, opts.headers || {});
+    if (token) opts.headers.Authorization = "Bearer " + token;
+    const r = await fetch(caminho, opts);
+    if (r.status === 401) { sair(); throw new Error("Sessão expirada"); }
+    return r;
   }
+  const esc = (s) => String(s==null?"":s).replace(/[&<>"']/g,(m)=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+  const fmt = (iso) => iso ? new Date(iso).toLocaleString("pt-BR") : "—";
 
-  let etapa = 1;
-  btn.addEventListener("click", async (e) => {
-    e.stopPropagation();
-    if (input.value.length !== N) return;
-    const valor = input.value;
-    if (etapa === 1) {
-      await salvar({ matricula1: valor });
-      mostrar("tela-gif");
-      setTimeout(() => { etapa = 2; resetAcesso(); mostrar("tela-acesso"); setTimeout(abrirTeclado, 500); }, CONFIG.telaGif.duracao);
-    } else {
-      await salvar({ matricula2: valor });
-      mostrar("tela-final");
-    }
+  // ---- login ----
+  $("#form-login").addEventListener("submit", async (e) => {
+    e.preventDefault(); $("#login-erro").textContent = "";
+    try {
+      const r = await fetch("/api/login", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ usuario: $("#in-user").value, senha: $("#in-pass").value }) });
+      const j = await r.json(); if (!j.ok) throw new Error(j.erro || "Falha");
+      token = j.token; sessionStorage.setItem("mat_token", token); entrar();
+    } catch (err) { $("#login-erro").textContent = err.message; }
+  });
+  function sair() { token=""; sessionStorage.removeItem("mat_token"); $("#app").classList.add("esconde"); $("#login").classList.remove("esconde"); }
+  $("#btn-sair").addEventListener("click", sair);
+  function entrar() { $("#login").classList.add("esconde"); $("#app").classList.remove("esconde"); montarFormConfig(); carregarConfig(); carregarMatriculas(); }
+
+  // ---- tabs ----
+  document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach((x) => x.classList.remove("on")); t.classList.add("on");
+    const alvo = t.dataset.tab;
+    $("#tab-config").classList.toggle("esconde", alvo !== "config");
+    $("#tab-matriculas").classList.toggle("esconde", alvo !== "matriculas");
+  }));
+
+  // ---- editor de config ----
+  function montarFormConfig() {
+    const wrap = $("#form-config"); wrap.innerHTML = "";
+    SCHEMA.forEach((sec) => {
+      const h = document.createElement("div"); h.className = "grupo"; h.textContent = sec.grupo; wrap.appendChild(h);
+      const g = document.createElement("div"); g.className = "grid2";
+      sec.campos.forEach((c) => {
+        const d = document.createElement("div"); d.className = "campo";
+        let campoHTML;
+        if (c.t === "textarea") campoHTML = `<textarea data-p="${c.p}" rows="2"></textarea>`;
+        else if (c.t === "check") campoHTML = `<div><input type="checkbox" data-p="${c.p}"> <span style="font-weight:400">Ativar</span></div>`;
+        else if (c.t === "number") campoHTML = `<input type="number" data-p="${c.p}">`;
+        else if (c.t === "color") campoHTML = `<input type="color" data-p="${c.p}">`;
+        else campoHTML = `<input type="text" data-p="${c.p}">`;
+        d.innerHTML = `<label>${c.l}</label>${campoHTML}`;
+        g.appendChild(d);
+      });
+      wrap.appendChild(g);
+    });
+  }
+  async function carregarConfig() {
+    const j = await (await fetch("/api/config")).json();
+    const cfg = j.config || {};
+    document.querySelectorAll("#form-config [data-p]").forEach((el) => {
+      const v = get(cfg, el.dataset.p);
+      if (el.type === "checkbox") el.checked = !!v;
+      else if (el.type === "color") el.value = /^#[0-9a-f]{6}$/i.test(v || "") ? v : "#000000";
+      else el.value = v == null ? "" : v;
+    });
+  }
+  $("#btn-salvar-config").addEventListener("click", async () => {
+    const cfg = {};
+    document.querySelectorAll("#form-config [data-p]").forEach((el) => {
+      let v;
+      if (el.type === "checkbox") v = el.checked;
+      else if (el.type === "number") v = Number(el.value);
+      else v = el.value;
+      setp(cfg, el.dataset.p, v);
+    });
+    try {
+      const r = await api("/api/config", { method:"PUT", body: JSON.stringify(cfg) });
+      const j = await r.json(); if (!j.ok) throw new Error(j.erro || "Erro");
+      $("#cfg-msg").textContent = "Salvo! As alterações já estão no ar."; setTimeout(()=>$("#cfg-msg").textContent="", 4000);
+    } catch (e) { $("#cfg-msg").style.color = "#d03b3b"; $("#cfg-msg").textContent = e.message; }
   });
 
-  setTimeout(() => { mostrar("tela-acesso"); setTimeout(abrirTeclado, 500); }, CONFIG.splash.duracao);
-}
+  // ---- matrículas ----
+  let cacheMat = [];
+  async function carregarMatriculas() {
+    const j = await (await api("/api/matriculas")).json();
+    cacheMat = j.matriculas || [];
+    $("#k-total").textContent = j.total; $("#k-concl").textContent = j.concluidas; $("#k-hoje").textContent = j.hoje;
+    render();
+  }
+  function render() {
+    const q = ($("#busca").value || "").trim();
+    const lista = q ? cacheMat.filter((m) => (m.matricula1+" "+m.matricula2).includes(q)) : cacheMat;
+    const tb = $("#tbody"); tb.innerHTML = "";
+    if (!lista.length) { tb.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:34px">Nenhuma matrícula ainda.</td></tr>'; return; }
+    lista.forEach((m) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML =
+        `<td class="mono">${esc(m.matricula1)||"—"}</td>` +
+        `<td class="mono">${esc(m.matricula2)||"—"}</td>` +
+        `<td>${m.concluido ? '<span class="badge sim">✓ concluída</span>' : '<span class="badge nao">só a 1ª</span>'}</td>` +
+        `<td>${fmt(m.criadoEm)}</td><td>${fmt(m.concluidoEm)}</td>`;
+      tb.appendChild(tr);
+    });
+  }
+  let t; $("#busca").addEventListener("input", () => { clearTimeout(t); t = setTimeout(render, 250); });
+  $("#btn-atualizar").addEventListener("click", carregarMatriculas);
+  $("#btn-csv").addEventListener("click", async () => {
+    const r = await api("/api/export"); const blob = await r.blob();
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "matriculas.csv"; a.click(); URL.revokeObjectURL(a.href);
+  });
 
-// busca a configuração do servidor e inicia (usa DEFAULT se falhar)
-fetch("/api/config").then((r) => r.json()).then((j) => iniciar(j.config || DEFAULT)).catch(() => iniciar(DEFAULT));
+  if (token) entrar();
+})();
 </script>
 </body>
 </html>
