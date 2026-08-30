@@ -1,0 +1,12 @@
+{
+  "name": "matriculas-app",
+  "version": "1.0.0",
+  "description": "Tela de acesso por matrícula + painel de configuração e registros",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4",
+    "express": "^4.19.2"
+  }
+}

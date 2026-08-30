@@ -1,0 +1,4 @@
+node_modules/
+.env
+data/matriculas.json
+data/config.json
