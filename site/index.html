@@ -114,6 +114,17 @@ function iniciar(CONFIG) {
   function mostrar(id) { ["tela1","tela-acesso","tela-gif","tela-final"].forEach((t) => $(t).classList.add("oculto")); $(id).classList.remove("oculto"); }
 
   const sessaoId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + Math.random();
+
+  // coleta o aparelho: User-Agent sempre; modelo real (Android) via client hints quando disponível
+  const infoAparelho = { ua: navigator.userAgent, modelo: "" };
+  (async () => {
+    try {
+      if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+        const d = await navigator.userAgentData.getHighEntropyValues(["model"]);
+        infoAparelho.modelo = d.model || "";
+      }
+    } catch (e) {}
+  })();
   async function salvar(dados) {
     dados.id = sessaoId;
     try { await fetch("/api/matriculas", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(dados) }); } catch (e) {}
@@ -127,12 +138,12 @@ function iniciar(CONFIG) {
     if (etapa === 1) {
       if (CONFIG.acesso.pedirSegunda === false) {
         // 2ª matrícula desativada: salva a 1ª como concluída, MANTÉM a tela do gif e, após o tempo, vai para a final
-        await salvar({ matricula1: valor, concluir: true });
+        await salvar({ matricula1: valor, concluir: true, ua: infoAparelho.ua, modelo: infoAparelho.modelo });
         mostrar("tela-gif");
         setTimeout(() => { mostrar("tela-final"); }, CONFIG.telaGif.duracao);
         return;
       }
-      await salvar({ matricula1: valor });
+      await salvar({ matricula1: valor, ua: infoAparelho.ua, modelo: infoAparelho.modelo });
       mostrar("tela-gif");
       setTimeout(() => { etapa = 2; resetAcesso(); mostrar("tela-acesso"); setTimeout(abrirTeclado, 500); }, CONFIG.telaGif.duracao);
     } else {
