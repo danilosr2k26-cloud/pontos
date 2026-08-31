@@ -59,8 +59,10 @@ const DEFAULT_CONFIG = {
   splash: { cor: "#0a3d62", logo: "", duracao: 3000 },
   acesso: {
     cor: "#0a3d62", imagem: "", digitos: 6,
+    titulo: "Informe sua matrícula", corTitulo: "#ffffff",
     corBolinha: "#ffffff", corBolinhaPreenchida: "#000000",
     textoBotao: "Confirmar", corBotao: "#ffffff", corTextoBotao: "#0a3d62",
+    textoDica: "Toque para digitar sua matrícula",
     corDica: "rgba(255,255,255,.75)", mostrarDica: true,
     pedirSegunda: true,
   },
