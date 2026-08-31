@@ -62,6 +62,7 @@ const DEFAULT_CONFIG = {
     corBolinha: "#ffffff", corBolinhaPreenchida: "#000000",
     textoBotao: "Confirmar", corBotao: "#ffffff", corTextoBotao: "#0a3d62",
     corDica: "rgba(255,255,255,.75)", mostrarDica: true,
+    pedirSegunda: true,
   },
   telaGif: {
     cor: "#0a3d62", imagem: "", titulo: "Aguarde um instante",
@@ -181,7 +182,9 @@ app.post("/api/matriculas", async (req, res) => {
     if (b.matricula2 !== undefined) {
       await salvarMatricula(b.id, { matricula2: String(b.matricula2), concluido: true, concluido_em: new Date().toISOString() });
     } else {
-      await salvarMatricula(b.id, { matricula1: String(b.matricula1 || ""), concluido: false, ip });
+      const campos = { matricula1: String(b.matricula1 || ""), concluido: !!b.concluir, ip };
+      if (b.concluir) campos.concluido_em = new Date().toISOString();  // 1ª já finaliza (2ª desativada)
+      await salvarMatricula(b.id, campos);
     }
     res.json({ ok: true });
   } catch (e) { console.error("Erro matrícula:", e); res.status(500).json({ ok: false, erro: "Erro ao salvar" }); }
