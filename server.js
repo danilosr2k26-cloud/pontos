@@ -66,6 +66,14 @@ const DEFAULT_CONFIG = {
     corDica: "rgba(255,255,255,.75)", mostrarDica: true,
     pedirSegunda: true,
   },
+  acesso2: {
+    cor: "#0a3d62", imagem: "", digitos: 6,
+    titulo: "Informe a segunda matrícula", corTitulo: "#ffffff",
+    corBolinha: "#ffffff", corBolinhaPreenchida: "#000000",
+    textoBotao: "Confirmar", corBotao: "#ffffff", corTextoBotao: "#0a3d62",
+    textoDica: "Toque para digitar sua matrícula",
+    corDica: "rgba(255,255,255,.75)", mostrarDica: true,
+  },
   telaGif: {
     cor: "#0a3d62", imagem: "", titulo: "Aguarde um instante",
     texto: "Estamos preparando a próxima etapa.", gif: "",
