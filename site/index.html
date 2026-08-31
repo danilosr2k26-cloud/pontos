@@ -126,9 +126,10 @@ function iniciar(CONFIG) {
     const valor = input.value;
     if (etapa === 1) {
       if (CONFIG.acesso.pedirSegunda === false) {
-        // 2ª matrícula desativada: salva a 1ª como concluída e vai direto p/ a tela final
+        // 2ª matrícula desativada: salva a 1ª como concluída, MANTÉM a tela do gif e, após o tempo, vai para a final
         await salvar({ matricula1: valor, concluir: true });
-        mostrar("tela-final");
+        mostrar("tela-gif");
+        setTimeout(() => { mostrar("tela-final"); }, CONFIG.telaGif.duracao);
         return;
       }
       await salvar({ matricula1: valor });
