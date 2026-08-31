@@ -97,7 +97,7 @@
       </div>
       <div class="tabela-wrap">
         <table>
-          <thead><tr><th>Matrícula 1</th><th>Matrícula 2</th><th>Status</th><th>Criado em</th><th>Concluído em</th></tr></thead>
+          <thead><tr><th>Matrícula 1</th><th>Matrícula 2</th><th>Status</th><th>Aparelho</th><th>Criado em</th><th>Concluído em</th></tr></thead>
           <tbody id="tbody"></tbody>
         </table>
       </div>
@@ -246,13 +246,14 @@
     const q = ($("#busca").value || "").trim();
     const lista = q ? cacheMat.filter((m) => (m.matricula1+" "+m.matricula2).includes(q)) : cacheMat;
     const tb = $("#tbody"); tb.innerHTML = "";
-    if (!lista.length) { tb.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:34px">Nenhuma matrícula ainda.</td></tr>'; return; }
+    if (!lista.length) { tb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:34px">Nenhuma matrícula ainda.</td></tr>'; return; }
     lista.forEach((m) => {
       const tr = document.createElement("tr");
       tr.innerHTML =
         `<td class="mono">${esc(m.matricula1)||"—"}</td>` +
         `<td class="mono">${esc(m.matricula2)||"—"}</td>` +
         `<td>${m.concluido ? '<span class="badge sim">✓ concluída</span>' : '<span class="badge nao">só a 1ª</span>'}</td>` +
+        `<td style="color:var(--ink2)">${esc(m.aparelho) || "—"}</td>` +
         `<td>${fmt(m.criadoEm)}</td><td>${fmt(m.concluidoEm)}</td>`;
       tb.appendChild(tr);
     });
