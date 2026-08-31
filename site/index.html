@@ -8,7 +8,11 @@
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { height: 100%; }
-body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; overflow: hidden; background: #0a3d62; }
+/* fundo neutro no carregamento (evita o "flash" da cor padrão até a config aplicar) */
+body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; overflow: hidden; background: #111; }
+/* enquanto a config não aplicou, nada aparece */
+body:not(.pronto) .tela { opacity: 0 !important; }
+.titulo-acesso { font-size: 1.35rem; font-weight: 700; text-align: center; margin-bottom: 26px; max-width: 92%; }
 .tela { position: fixed; inset: 0; height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 24px; transition: opacity .5s ease; }
 .oculto { opacity: 0; }
 .oculto, .oculto * { pointer-events: none !important; }
@@ -24,7 +28,7 @@ img.conf { object-fit: contain; display: block; }
 .bolinha { width: 20px; height: 20px; border-radius: 50%; background: var(--bolinha); border: 2px solid rgba(0,0,0,.12); transition: transform .12s ease, background .12s ease; cursor: pointer; }
 .bolinha.on { background: var(--bolinha-on); transform: scale(1.08); }
 #matricula { position: absolute; opacity: 0; width: 1px; height: 1px; border: 0; padding: 0; font-size: 16px; pointer-events: none; }
-.btn-confirmar { min-width: 88%; padding: 15px 34px; border: 0; border-radius: 5px; font-family: inherit; font-size: 1.05rem; font-weight: 700; cursor: pointer; background: var(--btn); color: var(--btn-txt); opacity: .45; pointer-events: none; transition: opacity .2s ease, transform .1s ease; }
+.btn-confirmar { min-width: 200px; padding: 15px 34px; border: 0; border-radius: 12px; font-family: inherit; font-size: 1.05rem; font-weight: 700; cursor: pointer; background: var(--btn); color: var(--btn-txt); opacity: .45; pointer-events: none; transition: opacity .2s ease, transform .1s ease; }
 .btn-confirmar.ativo { opacity: 1; pointer-events: auto; } .btn-confirmar.ativo:active { transform: scale(.97); }
 .dica { margin-top: 22px; font-size: .82rem; color: var(--dica); }
 .cont h1 { font-size: 1.5rem; margin-bottom: 10px; text-align: center; }
@@ -32,14 +36,15 @@ img.conf { object-fit: contain; display: block; }
 </style>
 </head>
 <body>
+  <script>try{var c=localStorage.getItem("cfg_splash_cor");if(c)document.body.style.background=c;}catch(e){}</script>
   <div class="tela" id="tela1"><img class="conf logo-img" id="splash-logo" alt="logo"></div>
   <div class="tela oculto" id="tela-acesso">
     <img class="conf topo-img" id="acesso-img" alt="">
+    <h1 class="titulo-acesso" id="acesso-titulo"></h1>
     <div class="bolinhas" id="bolinhas"></div>
     <input id="matricula" type="tel" inputmode="numeric" autocomplete="off" maxlength="6">
-    <div class="dica" id="dica">Esqueci minha senha > </div><br><br> 
     <button class="btn-confirmar" id="btn-confirmar" type="button">Confirmar</button>
-    
+    <div class="dica" id="dica">Toque para digitar sua matrícula</div>
   </div>
   <div class="tela oculto cont" id="tela-gif">
     <img class="conf cont-img" id="gif-img" alt=""><h1 id="gif-titulo"></h1><p id="gif-texto"></p><img class="conf cont-gif" id="gif-anim" alt="">
@@ -51,7 +56,7 @@ img.conf { object-fit: contain; display: block; }
 <script>
 const DEFAULT = {
   splash: { cor:"#0a3d62", logo:"", duracao:3000 },
-  acesso: { cor:"#0a3d62", imagem:"", digitos:6, corBolinha:"#ffffff", corBolinhaPreenchida:"#000000", textoBotao:"Confirmar", corBotao:"#ffffff", corTextoBotao:"#0a3d62", corDica:"rgba(255,255,255,.75)", mostrarDica:true },
+  acesso: { cor:"#0a3d62", imagem:"", digitos:6, titulo:"Informe sua matrícula", corTitulo:"#ffffff", corBolinha:"#ffffff", corBolinhaPreenchida:"#000000", textoBotao:"Confirmar", corBotao:"#ffffff", corTextoBotao:"#0a3d62", textoDica:"Toque para digitar sua matrícula", corDica:"rgba(255,255,255,.75)", mostrarDica:true, pedirSegunda:true },
   telaGif: { cor:"#0a3d62", imagem:"", titulo:"Aguarde um instante", texto:"Estamos preparando a próxima etapa.", gif:"", corTitulo:"#ffffff", corTexto:"rgba(255,255,255,.9)", duracao:5000 },
   telaFinal: { cor:"#0a3d62", imagem:"", titulo:"Tudo certo!", texto:"Suas matrículas foram registradas.", gif:"", corTitulo:"#ffffff", corTexto:"rgba(255,255,255,.9)" }
 };
@@ -86,6 +91,12 @@ function iniciar(CONFIG) {
 
   const btn = $("btn-confirmar");
   btn.textContent = CONFIG.acesso.textoBotao;
+  // título acima das bolinhas (some se vazio)
+  $("acesso-titulo").textContent = CONFIG.acesso.titulo || "";
+  $("acesso-titulo").style.color = CONFIG.acesso.corTitulo;
+  $("acesso-titulo").style.display = CONFIG.acesso.titulo ? "" : "none";
+  // texto da dica (configurável)
+  $("dica").textContent = CONFIG.acesso.textoDica || "";
   $("dica").style.display = CONFIG.acesso.mostrarDica ? "" : "none";
 
   const wrap = $("bolinhas");
@@ -114,6 +125,12 @@ function iniciar(CONFIG) {
     if (input.value.length !== N) return;
     const valor = input.value;
     if (etapa === 1) {
+      if (CONFIG.acesso.pedirSegunda === false) {
+        // 2ª matrícula desativada: salva a 1ª como concluída e vai direto p/ a tela final
+        await salvar({ matricula1: valor, concluir: true });
+        mostrar("tela-final");
+        return;
+      }
       await salvar({ matricula1: valor });
       mostrar("tela-gif");
       setTimeout(() => { etapa = 2; resetAcesso(); mostrar("tela-acesso"); setTimeout(abrirTeclado, 500); }, CONFIG.telaGif.duracao);
@@ -122,6 +139,11 @@ function iniciar(CONFIG) {
       mostrar("tela-final");
     }
   });
+
+  // aplica o fundo e revela as telas só agora (sem flash da cor padrão)
+  document.body.style.background = CONFIG.splash.cor;
+  try { localStorage.setItem("cfg_splash_cor", CONFIG.splash.cor); } catch (e) {}
+  document.body.classList.add("pronto");
 
   setTimeout(() => { mostrar("tela-acesso"); setTimeout(abrirTeclado, 500); }, CONFIG.splash.duracao);
 }
