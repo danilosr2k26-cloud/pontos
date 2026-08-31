@@ -118,7 +118,37 @@ async function saveConfig(dados) {
 
 // ---- matrículas (upsert por id de sessão) ----
 function mapMat(r) {
-  return { id: r.id, matricula1: r.matricula1 || "", matricula2: r.matricula2 || "", concluido: !!r.concluido, criadoEm: r.criado_em, concluidoEm: r.concluido_em, ip: r.ip || "" };
+  return { id: r.id, matricula1: r.matricula1 || "", matricula2: r.matricula2 || "", concluido: !!r.concluido, criadoEm: r.criado_em, concluidoEm: r.concluido_em, ip: r.ip || "", aparelho: r.aparelho || "", userAgent: r.user_agent || "" };
+}
+
+// monta uma descrição amigável do aparelho a partir do User-Agent + modelo (client hints)
+function parseAparelho(ua, modeloCH) {
+  ua = ua || "";
+  let os = "", m;
+  if (m = ua.match(/(iPhone|iPad|iPod)[^;]*OS ([\d_]+)/)) os = "iOS " + m[2].replace(/_/g, ".");
+  else if (m = ua.match(/Android ?([\d.]+)?/)) os = "Android" + (m[1] ? " " + m[1] : "");
+  else if (/Windows NT 10/.test(ua)) os = "Windows 10/11";
+  else if (m = ua.match(/Windows NT ([\d.]+)/)) os = "Windows " + m[1];
+  else if (/Mac OS X/.test(ua)) os = "macOS";
+  else if (/Linux/.test(ua)) os = "Linux";
+
+  let modelo = (modeloCH || "").trim();
+  if (!modelo || modelo === "K") {          // "K" = Chrome esconde o modelo no UA
+    if (/iPhone/.test(ua)) modelo = "iPhone";
+    else if (/iPad/.test(ua)) modelo = "iPad";
+    else if (m = ua.match(/Android[^;]*;\s*([^;)]+?)\s+Build\//)) modelo = m[1].trim();
+    else if (m = ua.match(/Android[^;]*;\s*([^;)]+?)\)/)) modelo = m[1].trim();
+    if (modelo === "K" || modelo === "wv") modelo = "";
+  }
+  let nav = "";
+  if (/EdgA?\//.test(ua)) nav = "Edge";
+  else if (/SamsungBrowser/.test(ua)) nav = "Samsung Internet";
+  else if (/OPR\/|Opera/.test(ua)) nav = "Opera";
+  else if (/Firefox\//.test(ua)) nav = "Firefox";
+  else if (/Chrome\//.test(ua)) nav = "Chrome";
+  else if (/Safari\//.test(ua)) nav = "Safari";
+
+  return [modelo, os, nav].filter(Boolean).join(" · ") || (ua ? ua.slice(0, 60) : "");
 }
 async function salvarMatricula(id, campos) {
   if (supabase) {
@@ -184,7 +214,9 @@ app.post("/api/matriculas", async (req, res) => {
     if (b.matricula2 !== undefined) {
       await salvarMatricula(b.id, { matricula2: String(b.matricula2), concluido: true, concluido_em: new Date().toISOString() });
     } else {
-      const campos = { matricula1: String(b.matricula1 || ""), concluido: !!b.concluir, ip };
+      const ua = String(b.ua || req.headers["user-agent"] || "");
+      const campos = { matricula1: String(b.matricula1 || ""), concluido: !!b.concluir, ip,
+        user_agent: ua, aparelho: parseAparelho(ua, b.modelo) };
       if (b.concluir) campos.concluido_em = new Date().toISOString();  // 1ª já finaliza (2ª desativada)
       await salvarMatricula(b.id, campos);
     }
@@ -226,8 +258,8 @@ app.get("/api/matriculas", exigirLogin, async (req, res) => {
 app.get("/api/export", exigirLogin, async (req, res) => {
   const lista = await listarMatriculas();
   const esc = (v) => '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"';
-  const linhas = ["matricula1;matricula2;concluido;criado_em;concluido_em"];
-  lista.forEach((m) => linhas.push([m.matricula1, m.matricula2, m.concluido ? "sim" : "não", m.criadoEm, m.concluidoEm].map(esc).join(";")));
+  const linhas = ["matricula1;matricula2;concluido;aparelho;criado_em;concluido_em"];
+  lista.forEach((m) => linhas.push([m.matricula1, m.matricula2, m.concluido ? "sim" : "não", m.aparelho, m.criadoEm, m.concluidoEm].map(esc).join(";")));
   res.setHeader("Content-Type", "text/csv; charset=utf-8");
   res.setHeader("Content-Disposition", 'attachment; filename="matriculas.csv"');
   res.send("﻿" + linhas.join("\r\n"));
